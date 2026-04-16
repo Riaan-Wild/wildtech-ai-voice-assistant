@@ -300,7 +300,7 @@ const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/power
   const apiVersion = tokenEndpoint.slice(tokenEndpoint.indexOf("api-version")).split("=")[1];
   const regionalChannelSettingsURL = `${environmentEndPoint}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
 
-  let directLineUrl = null;
+  
   let store = null;
   let usingMock = false;
 
