@@ -389,8 +389,7 @@ const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/power
       if (!window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory) return null;
 
       return await window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory({
-        subscriptionKey: SPEECH_KEY,
-        region: SPEECH_REGION
+        credentials: { region: SPEECH_REGION, subscriptionKey: SPEECH_KEY }
       });
     } catch (e) {
       console.warn("Speech disabled (could not init):", e);
