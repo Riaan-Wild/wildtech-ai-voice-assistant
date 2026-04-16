@@ -295,242 +295,158 @@
     let store = null;
 
     const tokenEndpoint = "https://23f35eb008b6e8ee81b314b56449de.c0.environment.api.powerplatform.com/powervirtualagents/botsbyschema/copilots_header_5f477/directline/token?api-version=2022-03-01-preview";
-    const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/powervirtualagents"));
-    const apiVersion = tokenEndpoint.slice(tokenEndpoint.indexOf("api-version")).split("=")[1];
-    const regionalChannelSettingsURL = `${environmentEndPoint}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
+    
+const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/powervirtualagents"));
+  const apiVersion = tokenEndpoint.slice(tokenEndpoint.indexOf("api-version")).split("=")[1];
+  const regionalChannelSettingsURL = `${environmentEndPoint}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
 
-    let usingMock = false;
+  let directLineUrl = null;
+  let store = null;
+  let usingMock = false;
 
-    // (mockResponses unchanged from your file; kept intact)
-    const mockResponses = {
-      'company research': "## Company Research Capabilities\n\nWild Tech's AI assistant can research any company in real-time using **Azure OpenAI + Bing Web Search grounding**.\n\nTry it now — type any company name!",
-      'research': "## Company Research Capabilities\n\nTell me a company name and I'll research them live, analyse their tech stack, and generate a tailored proposal.",
-      'product': "## Wild Tech Products & Solutions\n\nAsk about Dynamics 365, NetSuite, AI, Cloud, and more.",
-      'case stud': "## Wild Tech Success Stories\n\nAsk for case studies by industry.",
-      'netsuite': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
-      'dynamics': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
-      'erp': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
-      'rfp': "## Submit an RFP\n\nTell me your company name and I'll get started right here.",
-      'contact': "## Contact Wild Tech\n\nTell me if you'd like a 15-min discovery call or a 30-min technical consult.",
-      'speak': "## Contact Wild Tech\n\nTell me if you'd like a 15-min discovery call or a 30-min technical consult.",
-      'demo': "## Live Demo\n\nWant me to research your company? Type the name.",
-      'different': "## Why Wild Tech?\n\nAsk what sets us apart.",
-      'help': "## How Wild Tech Can Help\n\nWhat would you like to explore?"
+  // --- Minimal mock so we ALWAYS render something ---
+  function createMockDirectLine() {
+    const subscribers = { activity: [] };
+    let idCounter = 0;
+
+    const activity$ = {
+      subscribe(fn) {
+        subscribers.activity.push(fn);
+        return { unsubscribe() {} };
+      }
     };
 
-    function getMockResponse(text) {
-      const lower = (text || '').toLowerCase();
-      for (const [key, response] of Object.entries(mockResponses)) {
-        if (lower.includes(key)) return response;
-      }
-      return "Thanks for your message! I'm Wild Tech's AI assistant. What would you like to explore?";
-    }
-
-    function createMockDirectLine() {
-      const subscribers = { activity: [], connectionStatus: [] };
-      let idCounter = 0;
-
-      function createObs(type, initial) {
-        return {
-          subscribe(observer) {
-            const fn = typeof observer === 'function' ? observer : (v) => { if (observer.next) observer.next(v); };
-            subscribers[type].push(fn);
-            if (initial !== undefined) setTimeout(() => fn(initial), 0);
-            return { unsubscribe() { const i = subscribers[type].indexOf(fn); if (i > -1) subscribers[type].splice(i, 1); } };
-          }
-        };
-      }
-
-      const directLine = {
-        activity$: createObs('activity'),
-        connectionStatus$: createObs('connectionStatus', 2),
-        postActivity(activity) {
-          const userAct = { ...activity, id: `user-${++idCounter}`, timestamp: new Date().toISOString() };
-          subscribers.activity.forEach(fn => fn(userAct));
-
-          setTimeout(() => {
-            const response = getMockResponse(activity.text);
-            subscribers.activity.forEach(fn => fn({
-              type: 'message',
-              id: `bot-${++idCounter}`,
-              from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' },
-              text: response,
-              timestamp: new Date().toISOString()
-            }));
-          }, 800 + Math.random() * 700);
-
-          return { subscribe(obs) { if (obs.complete) obs.complete(); return { unsubscribe(){} }; } };
-        },
-        end() {}
-      };
-
-      setTimeout(() => {
-        subscribers.activity.forEach(fn => fn({
-          type: 'message',
-          id: `bot-${++idCounter}`,
-          from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' },
-          text: "Hello! I'm Wild Tech's AI assistant. How can I help you today?",
-          timestamp: new Date().toISOString()
-        }));
-      }, 600);
-
-      return directLine;
-    }
-
-    function getStyleOptions() {
-      return {
-        accent: "#2563eb",
-        backgroundColor: "#f9fbff",
-        bubbleBackground: "#ffffff",
-        bubbleBorderColor: "rgba(15,23,42,0.08)",
-        bubbleBorderRadius: 16,
-        bubbleBorderWidth: 1,
-        bubbleFromUserBackground: "#eef2ff",
-        bubbleFromUserTextColor: "#0f172a",
-        bubbleTextColor: "#0f172a",
-        botAvatarBackgroundColor: "#ffffff00",
-        botAvatarImage: "https://wild-tech.com/wp-content/uploads/2023/10/cropped-wildtech-favicon-32x32.png",
-        botAvatarInitials: "WT",
-        userAvatarBackgroundColor: "#0f172a",
-        userAvatarInitials: "You",
-        sendBoxBackground: "#ffffff",
-        sendBoxBorderTop: "solid 1px rgba(15,23,42,0.08)",
-        sendBoxButtonColor: "#2563eb",
-        sendBoxButtonColorOnHover: "#1d4ed8",
-        sendBoxHeight: 60,
-        suggestedActionBackgroundColor: "#2563eb",
-        suggestedActionBackgroundColorOnHover: "#1d4ed8",
-        suggestedActionBorderRadius: 12,
-        suggestedActionTextColor: "#ffffff",
-        suggestedActionLayout: "flow",
-        paddingRegular: 12,
-        hideUploadButton: false,
-        primaryFont: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
-      };
-    }
-
-    function createCustomStore() {
-      store = window.WebChat.createStore({}, ({ dispatch }) => next => action => {
-        if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
-          dispatch({
-            type: "DIRECT_LINE/POST_ACTIVITY",
-            meta: { method: "keyboard" },
-            payload: { activity: { channelData: { postBack: true }, name: "startConversation", type: "event" } }
-          });
-        }
-        return next(action);
-      });
-      return store;
-    }
-
-    function sendTopic(text) {
-      if (!store) return;
-
-      // If in mock mode, simulate both user + bot message
-      if (usingMock) {
-        store.dispatch({
-          type: 'DIRECT_LINE/INCOMING_ACTIVITY',
-          payload: { activity: { type: 'message', id: `user-${Date.now()}`, from: { id: 'user', role: 'user' }, text, timestamp: new Date().toISOString() } }
-        });
+    return {
+      activity$,
+      connectionStatus$: { subscribe(fn){ fn(2); return {unsubscribe() {}}; } },
+      postActivity(activity) {
+        const userAct = { ...activity, id: `user-${++idCounter}`, timestamp: new Date().toISOString() };
+        subscribers.activity.forEach(fn => fn(userAct));
 
         setTimeout(() => {
-          store.dispatch({
-            type: 'DIRECT_LINE/INCOMING_ACTIVITY',
-            payload: { activity: { type: 'message', id: `bot-${Date.now()}`, from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' }, text: getMockResponse(text), timestamp: new Date().toISOString() } }
-          });
-        }, 800);
+          subscribers.activity.forEach(fn => fn({
+            type: "message",
+            id: `bot-${++idCounter}`,
+            from: { id: "bot", name: "Wild Tech Assistant", role: "bot" },
+            text: "✅ Demo mode is running. Your bot connection failed, but the UI is working.\n\nNext step: check token endpoint + GitHub Pages HTTPS.",
+            timestamp: new Date().toISOString()
+          }));
+        }, 600);
 
-      } else {
-        store.dispatch({ type: "WEB_CHAT/SEND_MESSAGE", payload: { text } });
-      }
+        return { subscribe(){ return {unsubscribe(){}}; } };
+      },
+      end() {}
+    };
+  }
 
-      document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('sidebar__item--active'));
-    }
+  function getStyleOptions() {
+    return {
+      accent: "#2563eb",
+      backgroundColor: "#f9fbff",
+      bubbleBackground: "#ffffff",
+      bubbleBorderColor: "rgba(15,23,42,0.08)",
+      bubbleBorderRadius: 16,
+      bubbleBorderWidth: 1,
+      bubbleFromUserBackground: "#eef2ff",
+      bubbleFromUserTextColor: "#0f172a",
+      bubbleTextColor: "#0f172a",
+      botAvatarBackgroundColor: "#ffffff00",
+      botAvatarImage: "https://wild-tech.com/wp-content/uploads/2023/10/cropped-wildtech-favicon-32x32.png",
+      botAvatarInitials: "WT",
+      userAvatarBackgroundColor: "#0f172a",
+      userAvatarInitials: "You",
+      sendBoxBackground: "#ffffff",
+      sendBoxBorderTop: "solid 1px rgba(15,23,42,0.08)",
+      sendBoxButtonColor: "#2563eb",
+      sendBoxButtonColorOnHover: "#1d4ed8",
+      sendBoxHeight: 60,
+      paddingRegular: 12
+    };
+  }
 
-    async function buildWebSpeechPonyfillFactory() {
-      try {
-        if (!window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory) {
-          console.warn("Speech ponyfill factory not available in this WebChat bundle. Chat will still work.");
-          return null;
-        }
-
-        if (!SPEECH_KEY || SPEECH_KEY.includes("PASTE_") || !SPEECH_REGION || SPEECH_REGION.includes("PASTE_")) {
-          console.warn("Speech key/region not set. Voice will be disabled.");
-          return null;
-        }
-
-        return await window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory({
-          subscriptionKey: SPEECH_KEY,
-          region: SPEECH_REGION
+  function createCustomStore() {
+    store = window.WebChat.createStore({}, ({ dispatch }) => next => action => {
+      if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+        dispatch({
+          type: "DIRECT_LINE/POST_ACTIVITY",
+          meta: { method: "keyboard" },
+          payload: { activity: { channelData: { postBack: true }, name: "startConversation", type: "event" } }
         });
-      } catch (e) {
-        console.warn("Speech setup failed; continuing without voice:", e);
-        return null;
       }
+      return next(action);
+    });
+    return store;
+  }
+
+  function sendTopic(text) {
+    if (!store) return;
+    store.dispatch({ type: "WEB_CHAT/SEND_MESSAGE", payload: { text } });
+  }
+
+  async function buildWebSpeechPonyfillFactory() {
+    try {
+      if (!SPEECH_KEY || !SPEECH_REGION) return null;
+      if (!window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory) return null;
+
+      return await window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory({
+        subscriptionKey: SPEECH_KEY,
+        region: SPEECH_REGION
+      });
+    } catch (e) {
+      console.warn("Speech disabled (could not init):", e);
+      return null;
+    }
+  }
+
+  async function init() {
+    // 1) If WebChat did not load, show a clear error in the page
+    if (!window.WebChat) {
+      document.getElementById("webchat").innerHTML =
+        "<div style='padding:16px;font-family:system-ui;color:#b91c1c'>❌ WebChat failed to load. Check the CDN script or network blocking.</div>";
+      return;
     }
 
-    async function restartConversation() {
-      let directLine;
-      try {
-        if (usingMock) {
-          directLine = createMockDirectLine();
-        } else {
-          if (!directLineUrl) return;
-          const response = await fetch(tokenEndpoint);
-          const convInfo = await response.json();
-          if (!convInfo.token) return;
+    // 2) Always ensure the container can show content
+    const wc = document.getElementById("webchat");
+    wc.style.minHeight = "200px";
 
-          directLine = window.WebChat.createDirectLine({
-            domain: `${directLineUrl}v3/directline`,
-            token: convInfo.token
-          });
-        }
+    let directLine;
 
-        const webSpeechPonyfillFactory = await buildWebSpeechPonyfillFactory();
+    try {
+      const settingsResp = await fetch(regionalChannelSettingsURL);
+      const settingsData = await settingsResp.json();
+      directLineUrl = settingsData.channelUrlsById.directline;
 
-        window.WebChat.renderWebChat(
-          { directLine, styleOptions: getStyleOptions(), store: createCustomStore(), webSpeechPonyfillFactory },
-          document.getElementById("webchat")
-        );
-      } catch (e) {
-        console.error("Restart failed:", e);
-      }
+      const tokenResp = await fetch(tokenEndpoint);
+      const tokenData = await tokenResp.json();
+
+      if (!directLineUrl || !tokenData.token) throw new Error("Missing DirectLine URL or token");
+
+      directLine = window.WebChat.createDirectLine({
+        domain: `${directLineUrl}v3/directline`,
+        token: tokenData.token
+      });
+    } catch (e) {
+      console.warn("Bot unavailable; falling back to demo mode:", e);
+      usingMock = true;
+      directLine = createMockDirectLine();
     }
 
-    async function init() {
-      let directLine;
+    const webSpeechPonyfillFactory = await buildWebSpeechPonyfillFactory();
 
-      try {
-        const response = await fetch(regionalChannelSettingsURL, { signal: AbortSignal.timeout(5000) });
-        const data = await response.json();
-        directLineUrl = data.channelUrlsById.directline;
+    window.WebChat.renderWebChat(
+      { directLine, styleOptions: getStyleOptions(), store: createCustomStore(), webSpeechPonyfillFactory },
+      wc
+    );
 
-        const convResponse = await fetch(tokenEndpoint, { signal: AbortSignal.timeout(5000) });
-        const convInfo = await convResponse.json();
+    // Wire buttons (match your original IDs) [1](https://code.visualstudio.com/docs/copilot/guides/browser-agent-testing-guide)
+    document.getElementById("restartBtn")?.addEventListener("click", () => location.reload());
+    document.getElementById("closeBtn")?.addEventListener("click", () => alert("Close clicked (disabled)."));
+  }
 
-        directLine = window.WebChat.createDirectLine({
-          domain: `${directLineUrl}v3/directline`,
-          token: convInfo.token
-        });
-      } catch (err) {
-        console.warn("Bot unavailable, using demo mode:", err.message);
-        usingMock = true;
-        directLine = createMockDirectLine();
-      }
+  document.addEventListener("DOMContentLoaded", () => init());
+</script>
 
-      const webSpeechPonyfillFactory = await buildWebSpeechPonyfillFactory();
-
-      window.WebChat.renderWebChat(
-        { directLine, styleOptions: getStyleOptions(), store: createCustomStore(), webSpeechPonyfillFactory },
-        document.getElementById("webchat")
-      );
-
-      document.getElementById("restartBtn").addEventListener("click", restartConversation);
-      document.getElementById("closeBtn").addEventListener("click", () => window.close());
-    }
-
-    document.addEventListener("DOMContentLoaded", () => init().catch(console.error));
-  </script>
 </body>
 </html>
 ``
