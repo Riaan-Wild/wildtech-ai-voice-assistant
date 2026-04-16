@@ -4,177 +4,533 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Wild Tech AI Assistant" />
-  <title>Wild Tech AI Assistant — Gradient Bold</title>
+  <title>Wild Tech AI Assistant — Full Screen (With Sidebar)</title>
 
-  <!-- Bot Framework WebChat -->
+  <!-- Bot Framework WebChat (same as your file) -->
   <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 
   <style>
-    /* =========================
-       DESIGN (unchanged)
-       ========================= */
     :root {
-      --wt-blue: #2563eb;
-      --wt-purple: #7c3aed;
-      --wt-pink: #ec4899;
-      --wt-cyan: #06b6d4;
+      --wt-primary: #2563eb;
+      --wt-primary-hover: #1d4ed8;
+      --wt-secondary: #06b6d4;
+      --wt-ink: #0b1220;
+      --wt-ink-2: #12244a;
       --wt-text: #0f172a;
-      --wt-text-muted: #64748b;
+      --wt-text-muted: #475569;
       --wt-text-light: #94a3b8;
+      --wt-bg: #f6f8fc;
       --wt-surface: #ffffff;
-      --wt-border: rgba(15,23,42,0.08);
-      --wt-radius: 20px;
-      --wt-ease: cubic-bezier(0.22, 1, 0.36, 1);
-      --modal-max-width: 960px;
-      --modal-height: 90vh;
+      --wt-border: rgba(15, 23, 42, 0.10);
       --header-height: 60px;
+      --sidebar-width: 280px;
+      --wt-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-      background: #fafbff;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: var(--wt-text);
-    }
-
-    .hero {
-      background: linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95,#1e1b4b);
-      background-size: 300% 300%;
-      animation: gradientMove 12s ease infinite;
-      padding: 80px 32px;
-      text-align: center;
-      color: #fff;
-    }
-
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .hero h1 { font-size: 28px; margin-bottom: 20px; }
-    .hero p { max-width: 520px; margin: 0 auto 32px; }
-
-    .hero-btn {
-      padding: 14px 30px;
-      border-radius: 999px;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .hero-btn--primary { background:#fff; color:#312e81; }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0,0,0,0.4);
-    }
-
-    .overlay.open { display: flex; }
-
-    .modal {
-      background: #fff;
-      width: min(960px, 100%);
-      height: 90vh;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
+      background: var(--wt-bg);
       overflow: hidden;
     }
+    .shell { display: flex; flex-direction: column; height: 100vh; }
 
-    .modal-header {
-      background: linear-gradient(135deg,#1e1b4b,#312e81);
-      color: #fff;
-      padding: 16px 20px;
+    /* Header */
+    .header {
+      height: var(--header-height);
+      padding: 0 20px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      background: linear-gradient(135deg, var(--wt-ink), var(--wt-ink-2));
+      color: #fff;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .header__left { display: flex; align-items: center; gap: 14px; }
+    .header__logo {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--wt-primary), var(--wt-secondary));
+      display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 12px;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+    .header__title { font-weight: 800; font-size: 16px; letter-spacing: 0.3px; }
+    .header__subtitle { font-size: 11px; color: rgba(255,255,255,0.6); }
+    .header__dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: #34d399;
+      box-shadow: 0 0 0 3px rgba(52,211,153,0.25);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(52,211,153,0.25); }
+      50% { box-shadow: 0 0 0 6px rgba(52,211,153,0.10); }
+    }
+    .header__right { display: flex; gap: 8px; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.14); }
+
+    /* Main layout */
+    .main { flex: 1; display: flex; min-height: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--wt-surface);
+      border-right: 1px solid var(--wt-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+    .sidebar__section { padding: 20px 16px 12px; }
+    .sidebar__label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--wt-text-light);
+      margin-bottom: 10px;
+    }
+    .sidebar__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: var(--wt-text);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+    .sidebar__item:hover { background: rgba(37,99,235,0.06); }
+    .sidebar__item--active { background: rgba(37,99,235,0.08); color: var(--wt-primary); font-weight: 600; }
+    .sidebar__icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .sidebar__item-text { line-height: 1.3; }
+    .sidebar__item-desc { font-size: 11px; color: var(--wt-text-muted); font-weight: 400; }
+    .sidebar__footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--wt-border);
+    }
+    .sidebar__footer p { font-size: 11px; color: var(--wt-text-light); line-height: 1.5; }
+
+    /* Chat Area */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background:
+        radial-gradient(800px 500px at 30% 0%, rgba(37,99,235,0.04), transparent 55%),
+        radial-gradient(600px 400px at 80% 10%, rgba(6,182,212,0.04), transparent 50%),
+        #f9fbff;
+    }
+    .welcome {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--wt-border);
+      background: var(--wt-surface);
+    }
+    .welcome h2 { font-size: 18px; margin-bottom: 6px; }
+    .welcome p { font-size: 13px; color: var(--wt-text-muted); line-height: 1.5; }
+    .welcome__chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .welcome__chip {
+      padding: 7px 14px;
+      border: 1px solid var(--wt-border);
+      border-radius: 999px;
+      background: var(--wt-surface);
+      color: var(--wt-text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .welcome__chip:hover { background: var(--wt-primary); color: #fff; border-color: var(--wt-primary); }
+
+    /* WebChat */
+    #webchat { flex: 1; min-height: 0; font-size: 14px; }
+    #webchat .webchat__basic-transcript__content { white-space: pre-wrap !important; word-break: break-word !important; }
+    #webchat .webchat__bubble { max-width: 72% !important; margin: 8px 16px !important; }
+    #webchat .webchat__bubble__content { padding: 12px 16px !important; border-radius: 16px !important; }
+    #webchat .webchat__bubble__content ul,
+    #webchat .webchat__bubble__content ol { padding-left: 20px !important; margin: 6px 0 !important; }
+
+    .chat-footer {
+      padding: 6px 16px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--wt-text-light);
+      background: var(--wt-surface);
+      border-top: 1px solid var(--wt-border);
+      flex-shrink: 0;
     }
 
-    #webchat { flex: 1; }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .welcome { padding: 16px 20px; }
+    }
   </style>
 </head>
 
 <body>
-
-<div class="hero">
-  <h1>Start your next big idea<br>with a conversation</h1>
-  <p>AI‑powered research, insights, and recommendations — instantly.</p>
-  <button class="hero-btn hero-btn--primary" onclick="openAssistant()">Start chatting</button>
-</div>
-
-<div id="overlay" class="overlay" onclick="if(event.target===this)closeAssistant()">
-  <div class="modal">
-    <div class="modal-header">
-      <strong>Wild Tech Assistant</strong>
-      <button onclick="closeAssistant()">✕</button>
+  <div class="shell">
+    <div class="header">
+      <div class="header__left">
+        <div class="header__logo">WT</div>
+        <div>
+          <div class="header__title">Wild Tech Assistant</div>
+          <div class="header__subtitle">AI-Powered Business Intelligence</div>
+        </div>
+        <span class="header__dot" aria-hidden="true"></span>
+      </div>
+      <div class="header__right">
+        <button class="icon-btn" id="restartBtn" aria-label="Restart conversation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="closeBtn" aria-label="Close" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div id="webchat"></div>
+
+    <div class="main">
+      <nav class="sidebar" aria-label="Topics">
+        <div class="sidebar__section">
+          <div class="sidebar__label">Explore Topics</div>
+          <button class="sidebar__item sidebar__item--active" onclick="sendTopic('How can Wild Tech help my company?')">
+            <div class="sidebar__icon" style="background:rgba(37,99,235,0.1); color:var(--wt-primary);">🔍</div>
+            <div class="sidebar__item-text">Company Research<br><span class="sidebar__item-desc">Get a personalized proposal</span></div>
+          </button>
+          <button class="sidebar__item" onclick="sendTopic('What software products does Wild Tech offer?')">
+            <div class="sidebar__icon" style="background:rgba(6,182,212,0.1); color:var(--wt-secondary);">📦</div>
+            <div class="sidebar__item-text">Products<br><span class="sidebar__item-desc">Software & integrations</span></div>
+          </button>
+          <button class="sidebar__item" onclick="sendTopic('Show me Wild Tech case studies and customer success stories')">
+            <div class="sidebar__icon" style="background:rgba(139,92,246,0.1); color:#8b5cf6;">🏆</div>
+            <div class="sidebar__item-text">Case Studies<br><span class="sidebar__item-desc">Customer success stories</span></div>
+          </button>
+          <button class="sidebar__item" onclick="sendTopic('Compare NetSuite vs Dynamics 365 for my business')">
+            <div class="sidebar__icon" style="background:rgba(245,158,11,0.1); color:#f59e0b;">⚖</div>
+            <div class="sidebar__item-text">ERP Shootout<br><span class="sidebar__item-desc">NetSuite vs Dynamics 365</span></div>
+          </button>
+        </div>
+
+        <div class="sidebar__section">
+          <div class="sidebar__label">Quick Actions</div>
+          <button class="sidebar__item" onclick="sendTopic('I want to submit an RFP for review')">
+            <div class="sidebar__icon" style="background:rgba(16,185,129,0.1); color:#10b981;">📋</div>
+            <div class="sidebar__item-text">Submit RFP<br><span class="sidebar__item-desc">Get AI-powered review</span></div>
+          </button>
+          <button class="sidebar__item" onclick="sendTopic('I would like to speak with someone from Wild Tech')">
+            <div class="sidebar__icon" style="background:rgba(239,68,68,0.1); color:#ef4444;">📞</div>
+            <div class="sidebar__item-text">Contact Us<br><span class="sidebar__item-desc">Talk to a human</span></div>
+          </button>
+        </div>
+
+        <div class="sidebar__footer">
+          <p>Wild Tech AI Assistant is powered by Microsoft Copilot Studio and Azure OpenAI with real-time web intelligence.</p>
+        </div>
+      </nav>
+
+      <div class="chat-area">
+        <div class="welcome">
+          <h2>Welcome to Wild Tech AI</h2>
+          <p>I can research companies, generate proposals, compare ERP solutions, and share our success stories. What would you like to explore?</p>
+          <div class="welcome__chips">
+            <button class="welcome__chip" onclick="sendTopic('Research my company')">Research my company</button>
+            <button class="welcome__chip" onclick="sendTopic('Show me a demo')">Show me a demo</button>
+            <button class="welcome__chip" onclick="sendTopic('What makes Wild Tech different?')">Why Wild Tech?</button>
+          </div>
+        </div>
+
+        <div id="webchat" role="main"></div>
+        <div class="chat-footer">Powered by Wild Tech AI · Microsoft Copilot Studio · Azure OpenAI</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
+  <script>
+    // =========================================================
+    // 🔴 YOU MUST SET THESE TWO VALUES (Azure Speech resource)
+    // =========================================================
+    const SPEECH_KEY = "Ekq22RwY1llr3ab3MCL5Wu9mxiLbm6omHAtqPuG1dMd820ntSXgRJQQJ99CDACL93NaXJ3w3AAAEACOGBFAz";
+    const SPEECH_REGION = "australiaeast";
 
+    // Copilot Studio Direct Line token endpoint (your file already had this)
+    let directLineUrl = null;
+    let store = null;
 
-  const SPEECH_KEY   = "Ekq22RwY1llr3ab3MCL5Wu9mxiLbm6omHAtqPuG1dMd820ntSXgRJQQJ99CDACL93NaXJ3w3AAAEACOGBFAz";    
-  const SPEECH_REGION = "australiaeast";                      
+    const tokenEndpoint = "https://23f35eb008b6e8ee81b314b56449de.c0.environment.api.powerplatform.com/powervirtualagents/botsbyschema/copilots_header_5f477/directline/token?api-version=2022-03-01-preview";
+    const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/powervirtualagents"));
+    const apiVersion = tokenEndpoint.slice(tokenEndpoint.indexOf("api-version")).split("=")[1];
+    const regionalChannelSettingsURL = `${environmentEndPoint}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
 
-  const TOKEN_ENDPOINT =
-    "https://23f35eb008b6e8ee81b314b56449de.c0.environment.api.powerplatform.com/powervirtualagents/botsbyschema/copilots_header_5f477/directline/token?api-version=2022-03-01-preview";
+    let usingMock = false;
 
-  /* =========================================================
-     DO NOT CHANGE BELOW (unless you know why)
-     ========================================================= */
+    // (mockResponses unchanged from your file; kept intact)
+    const mockResponses = {
+      'company research': "## Company Research Capabilities\n\nWild Tech's AI assistant can research any company in real-time using **Azure OpenAI + Bing Web Search grounding**.\n\nTry it now — type any company name!",
+      'research': "## Company Research Capabilities\n\nTell me a company name and I'll research them live, analyse their tech stack, and generate a tailored proposal.",
+      'product': "## Wild Tech Products & Solutions\n\nAsk about Dynamics 365, NetSuite, AI, Cloud, and more.",
+      'case stud': "## Wild Tech Success Stories\n\nAsk for case studies by industry.",
+      'netsuite': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
+      'dynamics': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
+      'erp': "## ERP Comparison: NetSuite vs Dynamics 365\n\nWant a tailored comparison for your business?",
+      'rfp': "## Submit an RFP\n\nTell me your company name and I'll get started right here.",
+      'contact': "## Contact Wild Tech\n\nTell me if you'd like a 15-min discovery call or a 30-min technical consult.",
+      'speak': "## Contact Wild Tech\n\nTell me if you'd like a 15-min discovery call or a 30-min technical consult.",
+      'demo': "## Live Demo\n\nWant me to research your company? Type the name.",
+      'different': "## Why Wild Tech?\n\nAsk what sets us apart.",
+      'help': "## How Wild Tech Can Help\n\nWhat would you like to explore?"
+    };
 
-  let rendered = false;
+    function getMockResponse(text) {
+      const lower = (text || '').toLowerCase();
+      for (const [key, response] of Object.entries(mockResponses)) {
+        if (lower.includes(key)) return response;
+      }
+      return "Thanks for your message! I'm Wild Tech's AI assistant. What would you like to explore?";
+    }
 
-  async function openAssistant() {
-    document.getElementById("overlay").classList.add("open");
-    document.body.style.overflow = "hidden";
+    function createMockDirectLine() {
+      const subscribers = { activity: [], connectionStatus: [] };
+      let idCounter = 0;
 
-    if (rendered) return;
+      function createObs(type, initial) {
+        return {
+          subscribe(observer) {
+            const fn = typeof observer === 'function' ? observer : (v) => { if (observer.next) observer.next(v); };
+            subscribers[type].push(fn);
+            if (initial !== undefined) setTimeout(() => fn(initial), 0);
+            return { unsubscribe() { const i = subscribers[type].indexOf(fn); if (i > -1) subscribers[type].splice(i, 1); } };
+          }
+        };
+      }
 
-    const base = TOKEN_ENDPOINT.substring(0, TOKEN_ENDPOINT.indexOf("/powervirtualagents"));
-    const apiVersion = TOKEN_ENDPOINT.split("api-version=")[1];
-    const settingsUrl = `${base}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
+      const directLine = {
+        activity$: createObs('activity'),
+        connectionStatus$: createObs('connectionStatus', 2),
+        postActivity(activity) {
+          const userAct = { ...activity, id: `user-${++idCounter}`, timestamp: new Date().toISOString() };
+          subscribers.activity.forEach(fn => fn(userAct));
 
-    const settings = await fetch(settingsUrl).then(r => r.json());
-    const token = await fetch(TOKEN_ENDPOINT).then(r => r.json());
+          setTimeout(() => {
+            const response = getMockResponse(activity.text);
+            subscribers.activity.forEach(fn => fn({
+              type: 'message',
+              id: `bot-${++idCounter}`,
+              from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' },
+              text: response,
+              timestamp: new Date().toISOString()
+            }));
+          }, 800 + Math.random() * 700);
 
-    const directLine = window.WebChat.createDirectLine({
-      domain: `${settings.channelUrlsById.directline}v3/directline`,
-      token: token.token
-    });
+          return { subscribe(obs) { if (obs.complete) obs.complete(); return { unsubscribe(){} }; } };
+        },
+        end() {}
+      };
 
-    let webSpeechPonyfillFactory = null;
+      setTimeout(() => {
+        subscribers.activity.forEach(fn => fn({
+          type: 'message',
+          id: `bot-${++idCounter}`,
+          from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' },
+          text: "Hello! I'm Wild Tech's AI assistant. How can I help you today?",
+          timestamp: new Date().toISOString()
+        }));
+      }, 600);
 
-    if (window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory) {
-      webSpeechPonyfillFactory =
-        await window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory({
+      return directLine;
+    }
+
+    function getStyleOptions() {
+      return {
+        accent: "#2563eb",
+        backgroundColor: "#f9fbff",
+        bubbleBackground: "#ffffff",
+        bubbleBorderColor: "rgba(15,23,42,0.08)",
+        bubbleBorderRadius: 16,
+        bubbleBorderWidth: 1,
+        bubbleFromUserBackground: "#eef2ff",
+        bubbleFromUserTextColor: "#0f172a",
+        bubbleTextColor: "#0f172a",
+        botAvatarBackgroundColor: "#ffffff00",
+        botAvatarImage: "https://wild-tech.com/wp-content/uploads/2023/10/cropped-wildtech-favicon-32x32.png",
+        botAvatarInitials: "WT",
+        userAvatarBackgroundColor: "#0f172a",
+        userAvatarInitials: "You",
+        sendBoxBackground: "#ffffff",
+        sendBoxBorderTop: "solid 1px rgba(15,23,42,0.08)",
+        sendBoxButtonColor: "#2563eb",
+        sendBoxButtonColorOnHover: "#1d4ed8",
+        sendBoxHeight: 60,
+        suggestedActionBackgroundColor: "#2563eb",
+        suggestedActionBackgroundColorOnHover: "#1d4ed8",
+        suggestedActionBorderRadius: 12,
+        suggestedActionTextColor: "#ffffff",
+        suggestedActionLayout: "flow",
+        paddingRegular: 12,
+        hideUploadButton: false,
+        primaryFont: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+      };
+    }
+
+    function createCustomStore() {
+      store = window.WebChat.createStore({}, ({ dispatch }) => next => action => {
+        if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+          dispatch({
+            type: "DIRECT_LINE/POST_ACTIVITY",
+            meta: { method: "keyboard" },
+            payload: { activity: { channelData: { postBack: true }, name: "startConversation", type: "event" } }
+          });
+        }
+        return next(action);
+      });
+      return store;
+    }
+
+    function sendTopic(text) {
+      if (!store) return;
+
+      // If in mock mode, simulate both user + bot message
+      if (usingMock) {
+        store.dispatch({
+          type: 'DIRECT_LINE/INCOMING_ACTIVITY',
+          payload: { activity: { type: 'message', id: `user-${Date.now()}`, from: { id: 'user', role: 'user' }, text, timestamp: new Date().toISOString() } }
+        });
+
+        setTimeout(() => {
+          store.dispatch({
+            type: 'DIRECT_LINE/INCOMING_ACTIVITY',
+            payload: { activity: { type: 'message', id: `bot-${Date.now()}`, from: { id: 'bot', name: 'Wild Tech Assistant', role: 'bot' }, text: getMockResponse(text), timestamp: new Date().toISOString() } }
+          });
+        }, 800);
+
+      } else {
+        store.dispatch({ type: "WEB_CHAT/SEND_MESSAGE", payload: { text } });
+      }
+
+      document.querySelectorAll('.sidebar__item').forEach(el => el.classList.remove('sidebar__item--active'));
+    }
+
+    async function buildWebSpeechPonyfillFactory() {
+      try {
+        if (!window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory) {
+          console.warn("Speech ponyfill factory not available in this WebChat bundle. Chat will still work.");
+          return null;
+        }
+
+        if (!SPEECH_KEY || SPEECH_KEY.includes("PASTE_") || !SPEECH_REGION || SPEECH_REGION.includes("PASTE_")) {
+          console.warn("Speech key/region not set. Voice will be disabled.");
+          return null;
+        }
+
+        return await window.WebChat.createCognitiveServicesSpeechServicesPonyfillFactory({
           subscriptionKey: SPEECH_KEY,
           region: SPEECH_REGION
         });
+      } catch (e) {
+        console.warn("Speech setup failed; continuing without voice:", e);
+        return null;
+      }
     }
 
-    window.WebChat.renderWebChat(
-      { directLine, webSpeechPonyfillFactory },
-      document.getElementById("webchat")
-    );
+    async function restartConversation() {
+      let directLine;
+      try {
+        if (usingMock) {
+          directLine = createMockDirectLine();
+        } else {
+          if (!directLineUrl) return;
+          const response = await fetch(tokenEndpoint);
+          const convInfo = await response.json();
+          if (!convInfo.token) return;
 
-    rendered = true;
-  }
+          directLine = window.WebChat.createDirectLine({
+            domain: `${directLineUrl}v3/directline`,
+            token: convInfo.token
+          });
+        }
 
-  function closeAssistant() {
-    document.getElementById("overlay").classList.remove("open");
-    document.body.style.overflow = "";
-  }
-</script>
+        const webSpeechPonyfillFactory = await buildWebSpeechPonyfillFactory();
 
+        window.WebChat.renderWebChat(
+          { directLine, styleOptions: getStyleOptions(), store: createCustomStore(), webSpeechPonyfillFactory },
+          document.getElementById("webchat")
+        );
+      } catch (e) {
+        console.error("Restart failed:", e);
+      }
+    }
+
+    async function init() {
+      let directLine;
+
+      try {
+        const response = await fetch(regionalChannelSettingsURL, { signal: AbortSignal.timeout(5000) });
+        const data = await response.json();
+        directLineUrl = data.channelUrlsById.directline;
+
+        const convResponse = await fetch(tokenEndpoint, { signal: AbortSignal.timeout(5000) });
+        const convInfo = await convResponse.json();
+
+        directLine = window.WebChat.createDirectLine({
+          domain: `${directLineUrl}v3/directline`,
+          token: convInfo.token
+        });
+      } catch (err) {
+        console.warn("Bot unavailable, using demo mode:", err.message);
+        usingMock = true;
+        directLine = createMockDirectLine();
+      }
+
+      const webSpeechPonyfillFactory = await buildWebSpeechPonyfillFactory();
+
+      window.WebChat.renderWebChat(
+        { directLine, styleOptions: getStyleOptions(), store: createCustomStore(), webSpeechPonyfillFactory },
+        document.getElementById("webchat")
+      );
+
+      document.getElementById("restartBtn").addEventListener("click", restartConversation);
+      document.getElementById("closeBtn").addEventListener("click", () => window.close());
+    }
+
+    document.addEventListener("DOMContentLoaded", () => init().catch(console.error));
+  </script>
 </body>
 </html>
+``
